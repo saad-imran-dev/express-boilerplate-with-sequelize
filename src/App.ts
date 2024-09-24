@@ -1,12 +1,13 @@
 import express, { Express } from "express";
-import sequelize from "./database";
+import Database from "./database";
 import { handleErrors } from "./utils/helpers.utils";
 
 export class App {
-  app: Express = express();
+  private app: Express = express();
+  private database = Database.instance;
 
   constructor() {
-    this.setupApp()
+    this.setupApp();
   }
 
   private setupApp() {
@@ -27,9 +28,9 @@ export class App {
     this.app.use(express.json());
   }
 
-  async startServer(port: number) {
+  public async startServer(port: number) {
     try {
-      await sequelize.authenticate(); // Authenticates the database connection
+      await this.database.authenticate(); // Authenticates the database connection
       this.app.listen(port, () => {
         // Starts the server on port
         console.log("Server started on port", port);
