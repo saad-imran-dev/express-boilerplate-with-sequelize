@@ -6,24 +6,25 @@ export class App {
   app: Express = express();
 
   constructor() {
+    this.setupApp()
+  }
+
+  private setupApp() {
     this.setupMiddlewares();
     this.setupRoutes();
+    /** Setup `Error handler` after all middlewares & routes  */
+    this.app.use(handleErrors);
   }
 
   private setupRoutes() {
-    /**
-     * Regsiter and use routers from each routes
-     */
+    // Only for testing, to be removed after testing setup
+    this.app.get("/", (req, res) => {
+      res.send("Hello, World!");
+    });
   }
 
   private setupMiddlewares() {
     this.app.use(express.json());
-    this.app.use(handleErrors);
-
-    // Only for testing, to be removed after develop
-    this.app.get("/", (req, res) => {
-      res.send("Hello, World!");
-    });
   }
 
   async startServer(port: number) {

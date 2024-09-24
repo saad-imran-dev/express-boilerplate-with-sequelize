@@ -1,9 +1,11 @@
 import {
   Attributes,
+  CreateOptions,
   CreationAttributes,
   DestroyOptions,
   FindOptions,
   Model,
+  Transaction,
   UpdateOptions,
 } from "sequelize";
 import { IRepository } from "./IRepository";
@@ -27,15 +29,20 @@ export abstract class BaseRepository<TModel extends Model>
     return this.model.findAll<TModel>(options);
   }
 
-  async create(newEntity: CreationAttributes<TModel>): Promise<TModel> {
-    return this.model.create<TModel>(newEntity);
+  async create(
+    newEntity: CreationAttributes<TModel>,
+    options?: CreateOptions<Attributes<TModel>>
+  ): Promise<TModel> {
+    return this.model.create<TModel>(newEntity, options);
   }
 
   async updateOne(
     id: string,
-    updateValues: Partial<Attributes<TModel>>
+    updateValues: Partial<Attributes<TModel>>,
+    transaction?: Transaction
   ): Promise<TModel> {
     await this.model.update<TModel>(updateValues, {
+      transaction,
       where: { id },
     } as unknown as UpdateOptions<TModel>);
     return this.get(id);
@@ -49,9 +56,20 @@ export abstract class BaseRepository<TModel extends Model>
     return this.getAll({ where: options.where });
   }
 
-  async delete(id: string): Promise<void> {
+  async deleteOne(id: string, transaction?: Transaction): Promise<TModel> {
+    const entity = await this.get(id);
     await this.model.destroy({
+      transaction,
       where: { id },
     } as unknown as DestroyOptions<TModel>);
+    return entity;
+  }
+
+  async deleteMany(
+    options?: DestroyOptions<Attributes<TModel>>
+  ): Promise<TModel[]> {
+    const allEntity = await this.getAll({ where: options?.where });
+    await this.model.destroy(options);
+    return allEntity;
   }
 }

@@ -22,6 +22,6 @@ export abstract class BaseService<T extends Model> implements IService<T> {
   }
 
   async delete(id: string): Promise<void> {
-    await this.repository.delete(id);
+    await this.repository.deleteOne(id);
   }
 }
